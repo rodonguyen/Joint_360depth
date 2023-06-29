@@ -1,23 +1,14 @@
 import torch
-import torch.nn.functional as F
-import time
 import os
-import math
-import shutil
-import os.path as osp
 import matplotlib.pyplot as plt
-import torchvision
 from DPT.dpt.models import DPTDepthModel
-from DPT.dpt.transforms import Resize, NormalizeImage, PrepareForNet
 import matplotlib as mpl
 import matplotlib.cm as cm
-import argparse
-import importlib
 import numpy as np
 from imageio import imread
 import skimage
 import skimage.transform
-import cv2
+
 class Inference(object):
     def __init__(self,
                  config):
@@ -25,7 +16,7 @@ class Inference(object):
         
     def post_process_disparity(self,disp):
         disp = disp.cpu().detach().numpy()
-        return disp   
+        return disp
     
     def inference(self):
 
@@ -54,6 +45,10 @@ class Inference(object):
         for index,image_path in enumerate(eval_image):
             print('Inference {}/{}'.format(index+1, len(eval_image)))
              
+            read_img = imread(image_path)
+            print(read_img)
+            print(read_img.shape)
+
             input_image = (imread(image_path).astype("float32")/255.0)
             
             input_image = skimage.transform.resize(input_image, [self.config.pred_height, self.config.pred_width])
@@ -63,6 +58,9 @@ class Inference(object):
             # inputs = torch.from_numpy(inputs).unsqueeze(0).float().permute(0,3,1,2).cuda()
             inputs = torch.from_numpy(inputs).unsqueeze(0).float().permute(0,3,1,2)
             
+            print(inputs)
+            print(inputs.shape)
+
             if not self.config.Input_Full:
                 inputs = inputs[:,:,height//4: height - height//4,:]
 
@@ -73,7 +71,7 @@ class Inference(object):
             ## Convert depth to disparity ## 
             # max_value = torch.tensor([0.000005]).cuda()
             max_value = torch.tensor([0.000005])
-            disp =1. / torch.max(depth.unsqueeze(0),max_value)
+            disp = 1. / torch.max(depth.unsqueeze(0),max_value)
 
             disp_pp = self.post_process_disparity(disp).astype(np.float32).squeeze()
 
