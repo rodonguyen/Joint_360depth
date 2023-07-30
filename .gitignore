@@ -2,3 +2,4 @@ Assets/Super_S3D_Fres.pth
 *.pyc
 inference/output1
 inference/sample1
+bin
